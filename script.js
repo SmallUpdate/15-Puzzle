@@ -1,5 +1,7 @@
-canvas.width =  400;
-canvas.height = 400;
+const screenwh = Math.min(screen.width, screen.height) * 0.75
+console.log(screenwh) - 40
+canvas.width =  screenwh;
+canvas.height = screenwh;
 
 const CLR1 = "#121212";
 const CLR2 = "#242424";
@@ -55,7 +57,7 @@ function drawMatrix(matrix) {
 
 function drawElement(j, i, value, size) {
     if (value) {
-        const cellSize = 100;
+        const cellSize = screenwh / size;
         const padding = 4;
         const [x, y] = [cellSize*j, cellSize*i];
         const b = i*size+j+1 == value
