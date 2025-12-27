@@ -1,10 +1,7 @@
-const BG = "#202020"
-const MG = "#FF00FF"
-
 canvas.width =  400;
 canvas.height = 400;
 
-document.body.style.backgroundColor = BG
+document.body.style.backgroundColor = "#121212"
 document.body.style.margin = 0
 canvas.style.position = "absolute"
 canvas.style.left = "50%"
@@ -27,9 +24,8 @@ let m = [
 ]
 let p = [3, 3]
 
-function randomField() {
-    for (let i = 0; i < 100; ++i) {
-        pd = []
+function randomMove() {
+    pd = []
         for (let j = 0; j < 4; ++j) {
             const nx = p[0] + ds[j][0]
             const ny = p[1] + ds[j][1]
@@ -44,9 +40,7 @@ function randomField() {
         m[p[1]][p[0]] = m[ny][nx];
         m[ny][nx] = 0;
         p = [nx, ny];
-    }
 }
-randomField();
 
 function checkCorrect(x, y, n) {
     return n-1 == x+4*y
@@ -57,15 +51,15 @@ function drawCell(x, y, n) {
         const s = 94;
         const g =  8;
         const b = checkCorrect(x, y, n)
-        ctx.fillStyle = b ? MG : "black";
+        ctx.fillStyle = b ? "#BC13FE" : "#242424";
         ctx.fillRect(x*(s+g), y*(s+g), s, s);
-        ctx.fillStyle = b ? BG : MG
+        ctx.fillStyle = b ?  "#FFFFFF": "#8A8A8A"
         ctx.fillText(n, x*(s+g)+s/2, y*(s+g)+s/2)
     }
 }
 
 function clear() {
-    ctx.fillStyle = BG
+    ctx.fillStyle = "#121212"
     ctx.fillRect(0, 0, canvas.width, canvas.height)
 }
 
@@ -99,4 +93,17 @@ function keydown(e) {
     }
 }
 
-window.addEventListener('keydown', keydown);
+let moves = 0
+const FPS = 60
+
+function resolve() {
+    randomMove()
+    drawField()
+    moves += 1
+    if (moves < 100) {
+        setTimeout(resolve, 1000/FPS)
+    } else {
+        window.addEventListener('keydown', keydown);
+    }
+}
+resolve()
