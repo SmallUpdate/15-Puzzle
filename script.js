@@ -1,5 +1,5 @@
-const screenwh = Math.min(screen.width, screen.height) * 0.75
-console.log(screenwh) - 40
+const screenwh = Math.min(screen.width, screen.height) * 0.75;
+console.log(screenwh) - 40;
 canvas.width =  screenwh;
 canvas.height = screenwh;
 
@@ -11,6 +11,7 @@ const CLR5 = "#BC13FE";
 
 document.body.style.backgroundColor = CLR1;
 document.body.style.margin = 0;
+document.body.style.userSelect = "none"
 canvas.style.position = "absolute";
 canvas.style.left = "50%";
 canvas.style.top = "50%";
@@ -23,7 +24,7 @@ ctx.textBaseline = "middle";
 ctx.textAlign = "center";
 
 const size = 4;
-let matrix = generateMatrix(4);
+let matrix = generateMatrix(size);
 let player = {x: matrix.length-1, y: matrix[0].length-1};
 const directions = [[0,-1], [-1,0], [0,1], [1,0]];
 randomizeMatrix(matrix);
@@ -50,17 +51,35 @@ function drawMatrix(matrix) {
     clear()
     for (let i = 0; i < matrix.length; i++) {
         for (let j = 0; j < matrix[0].length; j++) {
-            drawElement(j, i, matrix[i][j], matrix.length);
+            drawElement(i, j, matrix[i][j], matrix.length);
         }
     }
 }
 
-function drawElement(j, i, value, size) {
+function checkPos(i, j, value) {
+    return i*size+j+1 == value
+}
+
+function checkMap() {
+    for (let i = 0; i < size; i++) {
+        for (let j = 0; j < size; j++) {
+            if (i!=size-1 || j!=size-1) {
+                if (!checkPos(i, j, matrix[i][j])) {
+                    console.log(i, j, matrix[i][j])
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
+
+function drawElement(i, j, value, size) {
     if (value) {
         const cellSize = screenwh / size;
         const padding = 4;
         const [x, y] = [cellSize*j, cellSize*i];
-        const b = i*size+j+1 == value
+        const b = checkPos(i, j, value)
         ctx.fillStyle = b ? CLR5 : CLR2;
         ctx.fillRect(x+padding, y+padding, cellSize-2*padding, cellSize-2*padding);
         ctx.fillStyle = b ? CLR4 : CLR3;
@@ -68,11 +87,24 @@ function drawElement(j, i, value, size) {
     }
 }
 
+let timerId;
+
 function move(x, y) {
-    matrix[player.y][player.x] = matrix[y][x];
-    matrix[y][x] = 0;
-    player = {x, y};
-    drawMatrix(matrix);
+    if (!gameEnded) {
+        if (!gameStarted) {
+            gameStarted = true;
+            timerId = setInterval(timer, 100);
+            console.log('started')
+        }
+        matrix[player.y][player.x] = matrix[y][x];
+        matrix[y][x] = 0;
+        player = {x, y};
+        drawMatrix(matrix);
+        if (checkMap()) {
+            gameEnded = true
+            clearInterval(timerId)
+        }
+    }
 }
 
 function click(e) {
@@ -97,7 +129,7 @@ function keydown(e) {
 }
 
 function randomizeMatrix(matrix) {
-    for (let i = 0; i < 2020; i++) {
+    for (let i = 0; i < 1000; i++) {
         let possibleMovements = [];
         for (const [dx, dy] of directions) {
             const [nx, ny] = [player.x + dx, player.y + dy];
@@ -110,8 +142,17 @@ function randomizeMatrix(matrix) {
         matrix[y][x] = 0;
         player = {x, y};
     }
-    drawMatrix(matrix)
+    drawMatrix(matrix);
 }
+
+let gameStarted = false
+let gameEnded = false
+let t = 0
 
 window.addEventListener("click", click);
 window.addEventListener("keydown", keydown);
+
+function timer() {
+    t += 1
+    time.innerText = Math.floor(t/10) + '.' + t%10 + 's'
+}
